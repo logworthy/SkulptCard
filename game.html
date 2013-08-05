@@ -1,0 +1,154 @@
+<html>
+<head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js" type="text/javascript"></script>
+<script src="skulpt/skulpt.js" type="text/javascript"></script>
+<script src="skulpt/builtin.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<script type="text/javascript">
+// output functions are configurable.  This one just appends some text
+// to a pre element.
+function outf(text) {
+    var mypre = document.getElementById("output");
+    mypre.innerHTML = mypre.innerHTML + text;
+}
+function builtinRead(x) {
+    if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
+            throw "File not found: '" + x + "'";
+    return Sk.builtinFiles["files"][x];
+}
+
+// Here's everything you need to run a python program in skulpt
+// grab the code from your textarea
+// get a reference to your pre element for output
+// configure the output function
+// call Sk.importMainWithBody()
+function runit() {
+   var prog = document.getElementById("yourcode").value;
+   var mypre = document.getElementById("output");
+   mypre.innerHTML = '';
+   Sk.canvas = "mycanvas";
+   Sk.pre = "output";
+   Sk.configure({output:outf, read:builtinRead});
+   eval(Sk.importMainWithBody("<stdin>",false,prog));
+}
+</script>
+
+<h3>SkulptCard</h3>
+<form>
+<textarea id="yourcode" cols="40" rows="10" style="display: none;">import turtle
+
+t = turtle.Turtle()
+t.forward(100)
+
+print "Hello World"
+</textarea><br />
+<!--
+<button type="button" onclick="runit()">Run</button>
+-->
+</form>
+<pre id="output" ></pre>
+<!-- If you want turtle graphics include a canvas 
+<canvas id="mycanvas" ></canvas> -->
+
+<script type="text/javascript">
+/* function to map cards to proper ordering...
+PNGs: 
+  101-113 = diamonds
+  114-126 = clubs
+  127-139 = hearts
+  140-152 = spades
+
+Actual order:
+  101-113 = spades
+  114-126 = clubs
+  127-139 = diamonds
+  140-152 = hearts
+
+this func should take a card in 'actual order'
+and return the 'source order', i.e. the png
+related to the card
+*/
+
+function cardSrc(oldNum){
+  var newNum = 0;
+  if (oldNum < 114) {newNum = oldNum+39}
+  else if (oldNum >= 127 && oldNum <= 139) {newNum = oldNum-26}
+  else if (oldNum >= 140 && oldNum <= 152) {newNum = oldNum-13}
+  else {newNum = oldNum}
+  return "cards/"+newNum+".png";;
+}
+
+
+function cardFlip(card, pos, flip) {
+  if (flip == "back") {
+    card.src = cardSrc(cardArray[pos]);
+    card.setAttribute("flip", "front");
+  } else {
+    card.src = cardSrc(155);
+    card.setAttribute("flip",  "back");
+  }
+}
+
+var cardArray = new Array();
+
+onload=function(){
+var nrCols=5;
+var nrRows=1;
+var root=document.getElementById('mydiv');
+
+/* deal some cards */
+
+for(var j=0;j<nrCols;j++){
+  cell=document.createElement('td');
+    var cardNotFound = true;
+    while (cardNotFound) {
+      cardnum = 101+Math.floor(Math.random() * 52);
+      if (cardArray.indexOf(cardnum) < 0) {
+        cardArray.push(cardnum)
+        cardNotFound = false;
+      }  
+    }
+}
+
+/* sort them */
+cardArray.sort();
+
+/* choose one at random */
+var chosenCard = cardArray[Math.floor(Math.random() * nrCols)];
+var pickme=document.createElement('img');
+pickme.src = cardSrc(chosenCard);
+root.appendChild(pickme);
+
+var tab=document.createElement('table');
+tab.className="mytable";
+var tbo=document.createElement('tbody');
+var row, cell;
+for(var i=0;i<nrRows;i++){
+
+  row=document.createElement('tr');
+
+  for(var j=0;j<nrCols;j++){
+    var card = document.createElement("img");
+    card.src = cardSrc(cardArray[j]);
+    /*card.attributes["arrayPos"] = j;*/
+    card.setAttribute("arrayPos", j);
+    card.setAttribute("flip", "front");
+    cardFlip(card, j, "front");
+    card.setAttribute("onclick","cardFlip(this,this.getAttribute(\"arrayPos\"),this.getAttribute(\"flip\"));");
+    cell.appendChild(card);
+    row.appendChild(cell);
+  }
+  tbo.appendChild(row);
+}
+tab.appendChild(tbo);
+root.appendChild(tab);
+}
+</script>
+<div id="mydiv"></div>
+</body>
+
+</html>
