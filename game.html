@@ -84,68 +84,104 @@ function cardSrc(oldNum){
 
 
 function cardFlip(card, pos, flip) {
-  if (flip == "back") {
-    card.src = cardSrc(cardArray[pos]);
-    card.setAttribute("flip", "front");
-  } else {
-    card.src = cardSrc(155);
-    card.setAttribute("flip",  "back");
+  if (!roundOver) {
+    /* flip the card */
+    if (flip == "back") {
+      card.src = cardSrc(cardArray[pos]);
+      card.setAttribute("flip", "front");
+    } else {
+      card.src = cardSrc(155);
+      card.setAttribute("flip",  "back");
+    }
+
+    /* update score */
+    if (roundStarted) {
+      totalFlips += 1;
+      currentFlips += 1;
+      updateScore();
+
+      /* check if we won */
+      if (cardArray[pos] == chosenCard) {
+        roundOver = true;
+      }
+    }
+
   }
+
+}
+
+function updateScore() {
+  scorePar.textContent = "Round: "+roundNumber+" Flips this round: "+currentFlips+" Total flips: "+totalFlips+" Average flips: "+(1.0*totalFlips)/roundNumber;
 }
 
 var cardArray = new Array();
+var scorePar = document.createElement('p');
+var totalFlips = 0;
+var currentFlips = 0;
+var roundNumber = 1;
+var roundOver = false;
+var roundStarted = false;
+var chosenCard;
+var pickme =document.createElement('img');
+var cardrow=document.createElement('tr');
 
-onload=function(){
-var nrCols=5;
-var nrRows=1;
-var root=document.getElementById('mydiv');
-
-/* deal some cards */
-
-for(var j=0;j<nrCols;j++){
-  cell=document.createElement('td');
-    var cardNotFound = true;
-    while (cardNotFound) {
-      cardnum = 101+Math.floor(Math.random() * 52);
-      if (cardArray.indexOf(cardnum) < 0) {
-        cardArray.push(cardnum)
-        cardNotFound = false;
-      }  
-    }
-}
-
-/* sort them */
-cardArray.sort();
-
-/* choose one at random */
-var chosenCard = cardArray[Math.floor(Math.random() * nrCols)];
-var pickme=document.createElement('img');
-pickme.src = cardSrc(chosenCard);
-root.appendChild(pickme);
-
-var tab=document.createElement('table');
-tab.className="mytable";
-var tbo=document.createElement('tbody');
-var row, cell;
-for(var i=0;i<nrRows;i++){
-
-  row=document.createElement('tr');
-
+function dealCards(){
+  roundStarted = false;
+  var nrCols=5;
+  /* deal some cards */
+  cardArray = new Array();
   for(var j=0;j<nrCols;j++){
+      var cardNotFound = true;
+      while (cardNotFound) {
+        cardnum = 101+Math.floor(Math.random() * 52);
+        if (cardArray.indexOf(cardnum) < 0) {
+          cardArray.push(cardnum)
+          cardNotFound = false;
+        }  
+      }
+  }
+
+  /* sort them */
+  cardArray.sort();
+
+  /* choose one at random */
+  chosenCard = cardArray[Math.floor(Math.random() * nrCols)];
+  pickme.src = cardSrc(chosenCard);
+
+  /* delete any children currently in cardrow */
+
+
+  /* add them to the row */
+  for(var j=0;j<nrCols;j++){
+    var cell = document.createElement('td');
     var card = document.createElement("img");
     card.src = cardSrc(cardArray[j]);
-    /*card.attributes["arrayPos"] = j;*/
     card.setAttribute("arrayPos", j);
     card.setAttribute("flip", "front");
     cardFlip(card, j, "front");
     card.setAttribute("onclick","cardFlip(this,this.getAttribute(\"arrayPos\"),this.getAttribute(\"flip\"));");
     cell.appendChild(card);
-    row.appendChild(cell);
+    cardrow.appendChild(cell);
   }
-  tbo.appendChild(row);
+  roundStarted = true;
+  roundOver = false;
+  
+  
+
 }
+
+onload=function(){
+var root=document.getElementById('mydiv');
+root.appendChild(scorePar);
+root.appendChild(pickme);
+
+var tab=document.createElement('table');
+tab.className="mytable";
+var tbo=document.createElement('tbody');
+tbo.appendChild(cardrow);
 tab.appendChild(tbo);
 root.appendChild(tab);
+dealCards()
 }
 </script>
 <div id="mydiv"></div>
