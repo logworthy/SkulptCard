@@ -37,7 +37,7 @@ hence the inclusion of [skulpt](https://github.com/skulpt/skulpt).
 ## Teaching
 
 If you're looking for advice on how to incorporate this in the classroom you should probably ask 
-[a proper teacher](http://blog.mrmeyer.com/).
+[an actual teacher](http://blog.mrmeyer.com/).
 
 I split the kids into two groups and had them play against each other (5 rounds each) on a projector.
 They enjoyed it and pretty quickly gravitated towards the probabilistic strategy that I mention above.
